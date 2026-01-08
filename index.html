@@ -55,14 +55,6 @@
       line-height:1.35;
     }
 
-    .row{
-      display:flex;
-      gap:12px;
-      align-items:stretch;
-      flex-wrap:wrap;
-      margin-top:14px;
-    }
-
     .panel{
       background:var(--card);
       border:1px solid var(--border);
@@ -70,6 +62,7 @@
       padding:14px;
       box-shadow:0 2px 10px rgba(15,23,42,.04);
       width:100%;
+      margin-top:14px;
     }
 
     .toolbar{
@@ -86,19 +79,6 @@
       gap:10px;
       flex-wrap:wrap;
       align-items:center;
-    }
-
-    .chip{
-      background:var(--soft);
-      color:var(--primary);
-      border:1px solid rgba(29,78,216,.18);
-      padding:8px 10px;
-      border-radius:999px;
-      font-size:.86rem;
-      display:flex;
-      gap:8px;
-      align-items:center;
-      user-select:none;
     }
 
     .btn{
@@ -132,10 +112,6 @@
       border:1px solid rgba(29,78,216,.25);
       box-shadow:none;
       font-weight:800;
-    }
-    .btn.danger{
-      background:#b91c1c;
-      box-shadow:0 6px 14px rgba(185,28,28,.14);
     }
 
     .toggle{
@@ -181,7 +157,7 @@
       box-shadow:0 2px 10px rgba(15,23,42,.04);
       display:flex;
       flex-direction:column;
-      gap:8px;
+      gap:10px;
     }
     .topic-card h3{
       margin:0;
@@ -196,7 +172,6 @@
       line-height:1.35;
     }
     .topic-card .topic-actions{
-      margin-top:8px;
       display:flex;
       gap:10px;
       flex-wrap:wrap;
@@ -276,8 +251,8 @@
       padding:12px;
       border-radius:14px;
       border:1px dashed rgba(29,78,216,.35);
-      background: #f8faff;
-      color: #0b1f5a;
+      background:#f8faff;
+      color:#0b1f5a;
       display:none;
     }
     .explain.show{ display:block; }
@@ -314,14 +289,6 @@
       line-height:1.35;
     }
 
-    .footer-note{
-      margin-top:10px;
-      color:var(--muted);
-      font-size:.88rem;
-      line-height:1.35;
-      text-align:center;
-    }
-
     .hidden{ display:none !important; }
 
     /* Improve tap behavior on mobile */
@@ -331,47 +298,29 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* Make the flip card clickable */
-    .card-click-area{
-      cursor:pointer;
-    }
+    .card-click-area{ cursor:pointer; }
   </style>
 </head>
 
 <body>
   <div class="wrap">
     <header>
-      <h1>Flip Cards (Q/A + Explanation) — 10 Topics</h1>
-      <p>Select a topic, then tap the card to flip. Use Next/Previous for navigation. Designed for mobile screens.</p>
+      <h1>Flip Cards — 10 Topics</h1>
+      <p>Select a topic, then tap the card to flip. Use Next/Previous to study in order. Explanations support learning.</p>
     </header>
 
-    <!-- TOPIC SELECT SCREEN -->
+    <!-- TOPIC SELECT SCREEN (simplified) -->
     <section id="screenTopics" class="panel" aria-label="Topic selection">
-      <div class="toolbar">
-        <div class="toolbar-left">
-          <div class="chip" id="chipTotalTopics">Topics: 10</div>
-          <div class="chip" id="chipTotalCards">Cards: 0</div>
-        </div>
-        <div class="toolbar-right">
-          <button class="btn secondary" id="btnAbout" type="button">How to Edit</button>
-        </div>
-      </div>
-
-      <div style="height:10px"></div>
       <div class="topic-grid" id="topicGrid"></div>
-
-      <div class="footer-note">
-        Tip: Rename topics and edit cards only inside the <strong>TOPICS</strong> list in the code.
-      </div>
     </section>
 
-    <!-- STUDY SCREEN -->
+    <!-- STUDY SCREEN (educational mode) -->
     <section id="screenStudy" class="panel hidden" aria-label="Study screen">
       <div class="toolbar">
         <div class="toolbar-left">
           <button class="btn ghost" id="btnBackToTopics" type="button">← Topics</button>
-          <div class="chip" id="chipTopicName">Topic</div>
-          <div class="chip" id="chipProgress">1 / 1</div>
+          <div class="badge" id="chipTopicName">Topic</div>
+          <div class="badge" id="chipProgress">1 / 1</div>
         </div>
 
         <div class="toolbar-right">
@@ -379,7 +328,6 @@
             <input type="checkbox" id="toggleAutoExplain" />
             <label for="toggleAutoExplain">Study mode (auto explanation)</label>
           </div>
-          <button class="btn ghost" id="btnShuffle" type="button">Shuffle</button>
         </div>
       </div>
 
@@ -390,14 +338,14 @@
           <div id="flipCard" class="flip no-select" aria-live="polite">
             <!-- FRONT -->
             <div class="face front card-click-area" id="faceFront" role="button" tabindex="0" aria-label="Question card. Tap to flip.">
-              <div class="badge" id="badgeFront">QUESTION</div>
+              <div class="badge">QUESTION</div>
               <p class="qtext" id="qText">Question appears here</p>
               <p class="hint">Tap the card to reveal the answer.</p>
             </div>
 
             <!-- BACK -->
             <div class="face back card-click-area" id="faceBack" role="button" tabindex="0" aria-label="Answer card. Tap to flip back.">
-              <div class="badge" id="badgeBack">ANSWER</div>
+              <div class="badge">ANSWER</div>
               <p class="atext" id="aText">Answer appears here</p>
 
               <div class="explain" id="explainBox">
@@ -418,33 +366,9 @@
           <div class="group">
             <button class="btn ghost" id="btnFlip" type="button">Flip</button>
             <button class="btn" id="btnExplain" type="button">Show Explanation</button>
-            <button class="btn danger" id="btnResetOrder" type="button">Reset Order</button>
           </div>
         </div>
       </div>
-    </section>
-
-    <!-- ABOUT MODAL (simple) -->
-    <section id="screenAbout" class="panel hidden" aria-label="How to edit">
-      <div class="toolbar">
-        <div class="toolbar-left">
-          <button class="btn ghost" id="btnCloseAbout" type="button">← Back</button>
-          <div class="chip">How to Edit</div>
-        </div>
-      </div>
-
-      <div style="height:10px"></div>
-      <p class="hint" style="font-size:0.95rem">
-        Edit only the <strong>TOPICS</strong> array in the JavaScript section:
-      </p>
-      <ol class="hint" style="margin:10px 0 0 18px">
-        <li>Change the <strong>title</strong> of each topic (10 topics by default).</li>
-        <li>Add cards inside <strong>cards</strong> as objects: <code>{ q: "...", a: "...", e: "..." }</code></li>
-        <li>Keep everything else unchanged for best mobile behavior.</li>
-      </ol>
-      <p class="hint" style="margin-top:12px">
-        Optional: You may set fewer/more topics, but this template is optimized for 10 topics.
-      </p>
     </section>
   </div>
 
@@ -457,8 +381,8 @@
       {
         title: "Topic 01 — Sample Topic",
         cards: [
-          { q: "What is the basic unit of structure in this topic?", a: "A concise answer here.", e: "A brief explanation that clarifies why the answer is correct." },
-          { q: "Give one key function relevant to this topic.", a: "Key function stated clearly.", e: "Explain mechanism/logic in 1–3 sentences." }
+          { q: "What is the basic concept in this topic?", a: "A concise answer here.", e: "A brief explanation that clarifies why the answer is correct." },
+          { q: "Give one important point relevant to this topic.", a: "Important point stated clearly.", e: "Explain the mechanism/logic in 1–3 sentences." }
         ]
       },
       {
@@ -524,11 +448,8 @@
 
     const screenTopics = el("screenTopics");
     const screenStudy  = el("screenStudy");
-    const screenAbout  = el("screenAbout");
 
     const topicGrid = el("topicGrid");
-    const chipTotalTopics = el("chipTotalTopics");
-    const chipTotalCards  = el("chipTotalCards");
 
     const chipTopicName = el("chipTopicName");
     const chipProgress  = el("chipProgress");
@@ -541,7 +462,6 @@
     const aText = el("aText");
     const eText = el("eText");
     const explainBox = el("explainBox");
-
     const hintExplain = el("hintExplain");
 
     const btnBackToTopics = el("btnBackToTopics");
@@ -549,36 +469,23 @@
     const btnNext = el("btnNext");
     const btnFlip = el("btnFlip");
     const btnExplain = el("btnExplain");
-    const btnShuffle = el("btnShuffle");
-    const btnResetOrder = el("btnResetOrder");
 
     const toggleAutoExplain = el("toggleAutoExplain");
-
-    const btnAbout = el("btnAbout");
-    const btnCloseAbout = el("btnCloseAbout");
 
     let currentTopicIndex = null;
     let currentIndex = 0;
     let workingCards = [];
-    let originalCards = [];
     let isExplanationVisible = false;
-
-    function totalCardCount(){
-      return TOPICS.reduce((sum, t) => sum + (t.cards?.length || 0), 0);
-    }
 
     function showScreen(which){
       screenTopics.classList.add("hidden");
       screenStudy.classList.add("hidden");
-      screenAbout.classList.add("hidden");
       which.classList.remove("hidden");
       window.scrollTo({ top: 0, behavior: "instant" });
     }
 
     function buildTopicGrid(){
       topicGrid.innerHTML = "";
-      chipTotalTopics.textContent = `Topics: ${TOPICS.length}`;
-      chipTotalCards.textContent = `Cards: ${totalCardCount()}`;
 
       TOPICS.forEach((topic, idx) => {
         const count = (topic.cards || []).length;
@@ -590,7 +497,7 @@
         h.textContent = topic.title;
 
         const p = document.createElement("p");
-        p.textContent = `${count} card${count === 1 ? "" : "s"} • Tap Start to study`;
+        p.textContent = `${count} card${count === 1 ? "" : "s"}`;
 
         const actions = document.createElement("div");
         actions.className = "topic-actions";
@@ -601,14 +508,7 @@
         startBtn.textContent = "Start";
         startBtn.addEventListener("click", () => startTopic(idx));
 
-        const previewBtn = document.createElement("button");
-        previewBtn.className = "btn ghost";
-        previewBtn.type = "button";
-        previewBtn.textContent = "Preview first card";
-        previewBtn.addEventListener("click", () => previewTopic(idx));
-
         actions.appendChild(startBtn);
-        actions.appendChild(previewBtn);
 
         card.appendChild(h);
         card.appendChild(p);
@@ -618,22 +518,11 @@
       });
     }
 
-    function previewTopic(idx){
-      const t = TOPICS[idx];
-      const first = (t.cards || [])[0];
-      const msg = first
-        ? `Topic: ${t.title}\n\nQ: ${first.q}\nA: ${first.a}\n\nExplanation: ${first.e || "(none)"}`
-        : `Topic: ${t.title}\n\nNo cards yet.`;
-      alert(msg);
-    }
-
     function startTopic(idx){
       currentTopicIndex = idx;
       const topic = TOPICS[idx];
-      originalCards = (topic.cards || []).slice();
       workingCards = (topic.cards || []).slice();
 
-      // Ensure there is at least one card
       if (workingCards.length === 0){
         alert("This topic has no cards yet. Please add cards inside TOPICS.");
         return;
@@ -642,10 +531,8 @@
       currentIndex = 0;
       chipTopicName.textContent = topic.title;
 
-      // Reset card state
       setFlip(false);
       hideExplanation();
-
       renderCard();
       showScreen(screenStudy);
     }
@@ -681,14 +568,9 @@
 
       chipProgress.textContent = `${currentIndex + 1} / ${workingCards.length}`;
 
-      // Explanation behavior
-      if (toggleAutoExplain.checked){
-        showExplanation();
-      } else {
-        hideExplanation();
-      }
+      if (toggleAutoExplain.checked) showExplanation();
+      else hideExplanation();
 
-      // Always show front when changing card
       setFlip(false);
     }
 
@@ -702,28 +584,11 @@
       renderCard();
     }
 
-    function shuffleCards(){
-      // Fisher–Yates shuffle on workingCards
-      for (let i = workingCards.length - 1; i > 0; i--){
-        const j = Math.floor(Math.random() * (i + 1));
-        [workingCards[i], workingCards[j]] = [workingCards[j], workingCards[i]];
-      }
-      currentIndex = 0;
-      renderCard();
-    }
-
-    function resetOrder(){
-      workingCards = originalCards.slice();
-      currentIndex = 0;
-      renderCard();
-    }
-
     /* Events */
     btnBackToTopics.addEventListener("click", () => showScreen(screenTopics));
 
     btnPrev.addEventListener("click", prevCard);
     btnNext.addEventListener("click", nextCard);
-
     btnFlip.addEventListener("click", toggleFlip);
 
     btnExplain.addEventListener("click", () => {
@@ -731,14 +596,9 @@
       else showExplanation();
     });
 
-    btnShuffle.addEventListener("click", shuffleCards);
-    btnResetOrder.addEventListener("click", resetOrder);
-
-    // Tap card faces to flip (mobile friendly)
     faceFront.addEventListener("click", toggleFlip);
     faceBack.addEventListener("click", toggleFlip);
 
-    // Keyboard accessibility
     function keyFlip(e){
       if (e.key === "Enter" || e.key === " "){
         e.preventDefault();
@@ -748,16 +608,11 @@
     faceFront.addEventListener("keydown", keyFlip);
     faceBack.addEventListener("keydown", keyFlip);
 
-    // About
-    btnAbout.addEventListener("click", () => showScreen(screenAbout));
-    btnCloseAbout.addEventListener("click", () => showScreen(screenTopics));
-
-    // Toggle auto explanation re-renders current card
     toggleAutoExplain.addEventListener("change", () => {
       if (!screenStudy.classList.contains("hidden")) renderCard();
     });
 
-    // Swipe gestures (simple)
+    // Simple swipe (mobile): left = next, right = previous
     let touchStartX = null;
     let touchStartY = null;
 
@@ -773,7 +628,6 @@
       const dx = t.screenX - touchStartX;
       const dy = t.screenY - touchStartY;
 
-      // Horizontal swipe threshold; ignore mostly vertical swipes
       if (Math.abs(dx) > 55 && Math.abs(dy) < 70){
         if (dx < 0) nextCard();
         else prevCard();
