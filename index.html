@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Flip Cards — 10 Topics (Q/A + Explanation)</title>
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --ink:#0f172a;
+      --muted:#475569;
+      --primary:#1d4ed8;
+      --primary-2:#2563eb;
+      --soft:#eef2ff;
+      --border:#e5e7eb;
+      --shadow:0 6px 22px rgba(15,23,42,.08);
+      --radius:16px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background:var(--bg);
+      color:var(--ink);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    .wrap{
+      max-width:980px;
+      margin:0 auto;
+      padding:16px;
+      padding-bottom:calc(16px + env(safe-area-inset-bottom));
+    }
+
+    header{
+      background:linear-gradient(135deg, var(--primary), #0b3aa6);
+      color:#fff;
+      border-radius:var(--radius);
+      padding:16px;
+      box-shadow:var(--shadow);
+    }
+    header h1{
+      margin:0;
+      font-size:1.15rem;
+      line-height:1.2;
+      letter-spacing:.2px;
+    }
+    header p{
+      margin:8px 0 0 0;
+      opacity:.92;
+      font-size:.92rem;
+      line-height:1.35;
+    }
+
+    .row{
+      display:flex;
+      gap:12px;
+      align-items:stretch;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+
+    .panel{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:14px;
+      box-shadow:0 2px 10px rgba(15,23,42,.04);
+      width:100%;
+    }
+
+    .toolbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .toolbar-left,
+    .toolbar-right{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .chip{
+      background:var(--soft);
+      color:var(--primary);
+      border:1px solid rgba(29,78,216,.18);
+      padding:8px 10px;
+      border-radius:999px;
+      font-size:.86rem;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      user-select:none;
+    }
+
+    .btn{
+      appearance:none;
+      border:0;
+      background:var(--primary);
+      color:#fff;
+      padding:11px 14px;
+      border-radius:12px;
+      font-weight:700;
+      font-size:.95rem;
+      cursor:pointer;
+      transition:transform .06s ease, background .2s ease;
+      box-shadow:0 6px 14px rgba(29,78,216,.18);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      min-height:44px; /* mobile tap target */
+    }
+    .btn:active{ transform:translateY(1px) }
+    .btn:hover{ background:var(--primary-2) }
+
+    .btn.secondary{
+      background:#0f172a;
+      box-shadow:0 6px 14px rgba(15,23,42,.12);
+    }
+    .btn.ghost{
+      background:#fff;
+      color:var(--primary);
+      border:1px solid rgba(29,78,216,.25);
+      box-shadow:none;
+      font-weight:800;
+    }
+    .btn.danger{
+      background:#b91c1c;
+      box-shadow:0 6px 14px rgba(185,28,28,.14);
+    }
+
+    .toggle{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#fff;
+      min-height:44px;
+    }
+    .toggle input{
+      width:18px; height:18px;
+      accent-color:var(--primary);
+    }
+    .toggle label{
+      font-size:.92rem;
+      color:var(--ink);
+      font-weight:650;
+      user-select:none;
+      cursor:pointer;
+    }
+
+    /* Topic grid */
+    .topic-grid{
+      display:grid;
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      gap:10px;
+    }
+    @media(min-width:560px){
+      .topic-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media(min-width:900px){
+      .topic-grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    .topic-card{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px;
+      background:#fff;
+      box-shadow:0 2px 10px rgba(15,23,42,.04);
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .topic-card h3{
+      margin:0;
+      font-size:1rem;
+      line-height:1.25;
+      color:var(--ink);
+    }
+    .topic-card p{
+      margin:0;
+      color:var(--muted);
+      font-size:.9rem;
+      line-height:1.35;
+    }
+    .topic-card .topic-actions{
+      margin-top:8px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    /* Flip card */
+    .stage{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .flip-wrap{
+      perspective:1200px;
+      width:100%;
+    }
+    .flip{
+      width:100%;
+      min-height:320px;
+      position:relative;
+      transform-style:preserve-3d;
+      transition:transform .55s ease;
+    }
+    .flip.is-flipped{ transform: rotateY(180deg); }
+
+    .face{
+      position:absolute;
+      inset:0;
+      backface-visibility:hidden;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-start;
+      gap:12px;
+      overflow:hidden;
+    }
+    .face.back{
+      transform: rotateY(180deg);
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:var(--soft);
+      color:var(--primary);
+      border:1px solid rgba(29,78,216,.18);
+      padding:7px 10px;
+      border-radius:999px;
+      font-weight:800;
+      font-size:.85rem;
+      width:max-content;
+      max-width:100%;
+    }
+
+    .qtext{
+      font-size:1.05rem;
+      font-weight:800;
+      line-height:1.35;
+      margin:0;
+      word-break:break-word;
+    }
+    .atext{
+      margin:0;
+      font-size:1rem;
+      line-height:1.5;
+      color:var(--ink);
+      word-break:break-word;
+    }
+
+    .explain{
+      margin-top:2px;
+      padding:12px;
+      border-radius:14px;
+      border:1px dashed rgba(29,78,216,.35);
+      background: #f8faff;
+      color: #0b1f5a;
+      display:none;
+    }
+    .explain.show{ display:block; }
+    .explain h4{
+      margin:0 0 6px 0;
+      font-size:.95rem;
+      color:var(--primary);
+    }
+    .explain p{
+      margin:0;
+      font-size:.95rem;
+      line-height:1.45;
+      color:#0f172a;
+    }
+
+    .controls{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      justify-content:space-between;
+      align-items:stretch;
+    }
+    .controls .group{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:stretch;
+    }
+
+    .hint{
+      font-size:.9rem;
+      color:var(--muted);
+      margin:0;
+      line-height:1.35;
+    }
+
+    .footer-note{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:.88rem;
+      line-height:1.35;
+      text-align:center;
+    }
+
+    .hidden{ display:none !important; }
+
+    /* Improve tap behavior on mobile */
+    .no-select{
+      -webkit-user-select:none;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Make the flip card clickable */
+    .card-click-area{
+      cursor:pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Flip Cards (Q/A + Explanation) — 10 Topics</h1>
+      <p>Select a topic, then tap the card to flip. Use Next/Previous for navigation. Designed for mobile screens.</p>
+    </header>
+
+    <!-- TOPIC SELECT SCREEN -->
+    <section id="screenTopics" class="panel" aria-label="Topic selection">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="chip" id="chipTotalTopics">Topics: 10</div>
+          <div class="chip" id="chipTotalCards">Cards: 0</div>
+        </div>
+        <div class="toolbar-right">
+          <button class="btn secondary" id="btnAbout" type="button">How to Edit</button>
+        </div>
+      </div>
+
+      <div style="height:10px"></div>
+      <div class="topic-grid" id="topicGrid"></div>
+
+      <div class="footer-note">
+        Tip: Rename topics and edit cards only inside the <strong>TOPICS</strong> list in the code.
+      </div>
+    </section>
+
+    <!-- STUDY SCREEN -->
+    <section id="screenStudy" class="panel hidden" aria-label="Study screen">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <button class="btn ghost" id="btnBackToTopics" type="button">← Topics</button>
+          <div class="chip" id="chipTopicName">Topic</div>
+          <div class="chip" id="chipProgress">1 / 1</div>
+        </div>
+
+        <div class="toolbar-right">
+          <div class="toggle">
+            <input type="checkbox" id="toggleAutoExplain" />
+            <label for="toggleAutoExplain">Study mode (auto explanation)</label>
+          </div>
+          <button class="btn ghost" id="btnShuffle" type="button">Shuffle</button>
+        </div>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <div class="stage">
+        <div class="flip-wrap">
+          <div id="flipCard" class="flip no-select" aria-live="polite">
+            <!-- FRONT -->
+            <div class="face front card-click-area" id="faceFront" role="button" tabindex="0" aria-label="Question card. Tap to flip.">
+              <div class="badge" id="badgeFront">QUESTION</div>
+              <p class="qtext" id="qText">Question appears here</p>
+              <p class="hint">Tap the card to reveal the answer.</p>
+            </div>
+
+            <!-- BACK -->
+            <div class="face back card-click-area" id="faceBack" role="button" tabindex="0" aria-label="Answer card. Tap to flip back.">
+              <div class="badge" id="badgeBack">ANSWER</div>
+              <p class="atext" id="aText">Answer appears here</p>
+
+              <div class="explain" id="explainBox">
+                <h4>Explanation</h4>
+                <p id="eText">Explanation appears here</p>
+              </div>
+
+              <p class="hint" id="hintExplain">Use “Show Explanation” if hidden.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <div class="group">
+            <button class="btn secondary" id="btnPrev" type="button">← Previous</button>
+            <button class="btn secondary" id="btnNext" type="button">Next →</button>
+          </div>
+          <div class="group">
+            <button class="btn ghost" id="btnFlip" type="button">Flip</button>
+            <button class="btn" id="btnExplain" type="button">Show Explanation</button>
+            <button class="btn danger" id="btnResetOrder" type="button">Reset Order</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT MODAL (simple) -->
+    <section id="screenAbout" class="panel hidden" aria-label="How to edit">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <button class="btn ghost" id="btnCloseAbout" type="button">← Back</button>
+          <div class="chip">How to Edit</div>
+        </div>
+      </div>
+
+      <div style="height:10px"></div>
+      <p class="hint" style="font-size:0.95rem">
+        Edit only the <strong>TOPICS</strong> array in the JavaScript section:
+      </p>
+      <ol class="hint" style="margin:10px 0 0 18px">
+        <li>Change the <strong>title</strong> of each topic (10 topics by default).</li>
+        <li>Add cards inside <strong>cards</strong> as objects: <code>{ q: "...", a: "...", e: "..." }</code></li>
+        <li>Keep everything else unchanged for best mobile behavior.</li>
+      </ol>
+      <p class="hint" style="margin-top:12px">
+        Optional: You may set fewer/more topics, but this template is optimized for 10 topics.
+      </p>
+    </section>
+  </div>
+
+  <script>
+    /************************************************************
+     * EDIT ONLY THIS SECTION: TOPICS (10 topics)
+     * Each card: { q: "Question", a: "Answer", e: "Explanation" }
+     ************************************************************/
+    const TOPICS = [
+      {
+        title: "Topic 01 — Sample Topic",
+        cards: [
+          { q: "What is the basic unit of structure in this topic?", a: "A concise answer here.", e: "A brief explanation that clarifies why the answer is correct." },
+          { q: "Give one key function relevant to this topic.", a: "Key function stated clearly.", e: "Explain mechanism/logic in 1–3 sentences." }
+        ]
+      },
+      {
+        title: "Topic 02 — Sample Topic",
+        cards: [
+          { q: "Sample Q1 for Topic 02?", a: "Sample answer.", e: "Sample explanation." }
+        ]
+      },
+      {
+        title: "Topic 03 — Sample Topic",
+        cards: [
+          { q: "Sample Q1 for Topic 03?", a: "Sample answer.", e: "Sample explanation." }
+        ]
+      },
+      {
+        title: "Topic 04 — Sample Topic",
+        cards: [
+          { q: "Sample Q1 for Topic 04?", a: "Sample answer.", e: "Sample explanation." }
+        ]
+      },
+      {
+        title: "Topic 05 — Sample Topic",
+        cards: [
+          { q: "Sample Q1 for Topic 05?", a: "Sample answer.", e: "Sample explanation." }
+        ]
+      },
+      {
+        title: "Topic 06 — Sample Topic",
+        cards: [
+          { q: "Sample Q1 for Topic 06?", a: "Sample answer.", e: "Sample explanation." }
+        ]
+      },
+      {
+        title: "Topic 07 — Sample Topic",
+        cards: [
+          { q: "Sample Q1 for Topic 07?", a: "Sample answer.", e: "Sample explanation." }
+        ]
+      },
+      {
+        title: "Topic 08 — Sample Topic",
+        cards: [
+          { q: "Sample Q1 for Topic 08?", a: "Sample answer.", e: "Sample explanation." }
+        ]
+      },
+      {
+        title: "Topic 09 — Sample Topic",
+        cards: [
+          { q: "Sample Q1 for Topic 09?", a: "Sample answer.", e: "Sample explanation." }
+        ]
+      },
+      {
+        title: "Topic 10 — Sample Topic",
+        cards: [
+          { q: "Sample Q1 for Topic 10?", a: "Sample answer.", e: "Sample explanation." }
+        ]
+      }
+    ];
+
+    /************************************************************
+     * APP LOGIC (no edits needed)
+     ************************************************************/
+    const el = (id) => document.getElementById(id);
+
+    const screenTopics = el("screenTopics");
+    const screenStudy  = el("screenStudy");
+    const screenAbout  = el("screenAbout");
+
+    const topicGrid = el("topicGrid");
+    const chipTotalTopics = el("chipTotalTopics");
+    const chipTotalCards  = el("chipTotalCards");
+
+    const chipTopicName = el("chipTopicName");
+    const chipProgress  = el("chipProgress");
+
+    const flipCard = el("flipCard");
+    const faceFront = el("faceFront");
+    const faceBack  = el("faceBack");
+
+    const qText = el("qText");
+    const aText = el("aText");
+    const eText = el("eText");
+    const explainBox = el("explainBox");
+
+    const hintExplain = el("hintExplain");
+
+    const btnBackToTopics = el("btnBackToTopics");
+    const btnPrev = el("btnPrev");
+    const btnNext = el("btnNext");
+    const btnFlip = el("btnFlip");
+    const btnExplain = el("btnExplain");
+    const btnShuffle = el("btnShuffle");
+    const btnResetOrder = el("btnResetOrder");
+
+    const toggleAutoExplain = el("toggleAutoExplain");
+
+    const btnAbout = el("btnAbout");
+    const btnCloseAbout = el("btnCloseAbout");
+
+    let currentTopicIndex = null;
+    let currentIndex = 0;
+    let workingCards = [];
+    let originalCards = [];
+    let isExplanationVisible = false;
+
+    function totalCardCount(){
+      return TOPICS.reduce((sum, t) => sum + (t.cards?.length || 0), 0);
+    }
+
+    function showScreen(which){
+      screenTopics.classList.add("hidden");
+      screenStudy.classList.add("hidden");
+      screenAbout.classList.add("hidden");
+      which.classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+
+    function buildTopicGrid(){
+      topicGrid.innerHTML = "";
+      chipTotalTopics.textContent = `Topics: ${TOPICS.length}`;
+      chipTotalCards.textContent = `Cards: ${totalCardCount()}`;
+
+      TOPICS.forEach((topic, idx) => {
+        const count = (topic.cards || []).length;
+
+        const card = document.createElement("div");
+        card.className = "topic-card";
+
+        const h = document.createElement("h3");
+        h.textContent = topic.title;
+
+        const p = document.createElement("p");
+        p.textContent = `${count} card${count === 1 ? "" : "s"} • Tap Start to study`;
+
+        const actions = document.createElement("div");
+        actions.className = "topic-actions";
+
+        const startBtn = document.createElement("button");
+        startBtn.className = "btn";
+        startBtn.type = "button";
+        startBtn.textContent = "Start";
+        startBtn.addEventListener("click", () => startTopic(idx));
+
+        const previewBtn = document.createElement("button");
+        previewBtn.className = "btn ghost";
+        previewBtn.type = "button";
+        previewBtn.textContent = "Preview first card";
+        previewBtn.addEventListener("click", () => previewTopic(idx));
+
+        actions.appendChild(startBtn);
+        actions.appendChild(previewBtn);
+
+        card.appendChild(h);
+        card.appendChild(p);
+        card.appendChild(actions);
+
+        topicGrid.appendChild(card);
+      });
+    }
+
+    function previewTopic(idx){
+      const t = TOPICS[idx];
+      const first = (t.cards || [])[0];
+      const msg = first
+        ? `Topic: ${t.title}\n\nQ: ${first.q}\nA: ${first.a}\n\nExplanation: ${first.e || "(none)"}`
+        : `Topic: ${t.title}\n\nNo cards yet.`;
+      alert(msg);
+    }
+
+    function startTopic(idx){
+      currentTopicIndex = idx;
+      const topic = TOPICS[idx];
+      originalCards = (topic.cards || []).slice();
+      workingCards = (topic.cards || []).slice();
+
+      // Ensure there is at least one card
+      if (workingCards.length === 0){
+        alert("This topic has no cards yet. Please add cards inside TOPICS.");
+        return;
+      }
+
+      currentIndex = 0;
+      chipTopicName.textContent = topic.title;
+
+      // Reset card state
+      setFlip(false);
+      hideExplanation();
+
+      renderCard();
+      showScreen(screenStudy);
+    }
+
+    function setFlip(flipped){
+      flipCard.classList.toggle("is-flipped", flipped);
+    }
+
+    function toggleFlip(){
+      flipCard.classList.toggle("is-flipped");
+    }
+
+    function showExplanation(){
+      isExplanationVisible = true;
+      explainBox.classList.add("show");
+      btnExplain.textContent = "Hide Explanation";
+      hintExplain.textContent = "";
+    }
+
+    function hideExplanation(){
+      isExplanationVisible = false;
+      explainBox.classList.remove("show");
+      btnExplain.textContent = "Show Explanation";
+      hintExplain.textContent = "Use “Show Explanation” if hidden.";
+    }
+
+    function renderCard(){
+      const item = workingCards[currentIndex];
+
+      qText.textContent = item.q || "(No question)";
+      aText.textContent = item.a || "(No answer)";
+      eText.textContent = item.e || "No explanation provided.";
+
+      chipProgress.textContent = `${currentIndex + 1} / ${workingCards.length}`;
+
+      // Explanation behavior
+      if (toggleAutoExplain.checked){
+        showExplanation();
+      } else {
+        hideExplanation();
+      }
+
+      // Always show front when changing card
+      setFlip(false);
+    }
+
+    function prevCard(){
+      currentIndex = (currentIndex - 1 + workingCards.length) % workingCards.length;
+      renderCard();
+    }
+
+    function nextCard(){
+      currentIndex = (currentIndex + 1) % workingCards.length;
+      renderCard();
+    }
+
+    function shuffleCards(){
+      // Fisher–Yates shuffle on workingCards
+      for (let i = workingCards.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [workingCards[i], workingCards[j]] = [workingCards[j], workingCards[i]];
+      }
+      currentIndex = 0;
+      renderCard();
+    }
+
+    function resetOrder(){
+      workingCards = originalCards.slice();
+      currentIndex = 0;
+      renderCard();
+    }
+
+    /* Events */
+    btnBackToTopics.addEventListener("click", () => showScreen(screenTopics));
+
+    btnPrev.addEventListener("click", prevCard);
+    btnNext.addEventListener("click", nextCard);
+
+    btnFlip.addEventListener("click", toggleFlip);
+
+    btnExplain.addEventListener("click", () => {
+      if (isExplanationVisible) hideExplanation();
+      else showExplanation();
+    });
+
+    btnShuffle.addEventListener("click", shuffleCards);
+    btnResetOrder.addEventListener("click", resetOrder);
+
+    // Tap card faces to flip (mobile friendly)
+    faceFront.addEventListener("click", toggleFlip);
+    faceBack.addEventListener("click", toggleFlip);
+
+    // Keyboard accessibility
+    function keyFlip(e){
+      if (e.key === "Enter" || e.key === " "){
+        e.preventDefault();
+        toggleFlip();
+      }
+    }
+    faceFront.addEventListener("keydown", keyFlip);
+    faceBack.addEventListener("keydown", keyFlip);
+
+    // About
+    btnAbout.addEventListener("click", () => showScreen(screenAbout));
+    btnCloseAbout.addEventListener("click", () => showScreen(screenTopics));
+
+    // Toggle auto explanation re-renders current card
+    toggleAutoExplain.addEventListener("change", () => {
+      if (!screenStudy.classList.contains("hidden")) renderCard();
+    });
+
+    // Swipe gestures (simple)
+    let touchStartX = null;
+    let touchStartY = null;
+
+    screenStudy.addEventListener("touchstart", (e) => {
+      const t = e.changedTouches[0];
+      touchStartX = t.screenX;
+      touchStartY = t.screenY;
+    }, { passive: true });
+
+    screenStudy.addEventListener("touchend", (e) => {
+      if (touchStartX === null || touchStartY === null) return;
+      const t = e.changedTouches[0];
+      const dx = t.screenX - touchStartX;
+      const dy = t.screenY - touchStartY;
+
+      // Horizontal swipe threshold; ignore mostly vertical swipes
+      if (Math.abs(dx) > 55 && Math.abs(dy) < 70){
+        if (dx < 0) nextCard();
+        else prevCard();
+      }
+      touchStartX = null;
+      touchStartY = null;
+    }, { passive: true });
+
+    // Init
+    buildTopicGrid();
+    showScreen(screenTopics);
+  </script>
+</body>
+</html>
